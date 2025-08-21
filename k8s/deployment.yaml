@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: hola-pod
 spec:
-  replicas: 1 
+  replicas: 1
   selector:
     matchLabels:
       app: hola-pod
@@ -14,13 +14,9 @@ spec:
     spec:
       containers:
       - name: hola-container
-        image: quay.io/martinezj/hola-pod:1.0.8
+        image: quay.io/martinezj/hola-pod:latest
         ports:
         - containerPort: 8080
-        env:
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
       imagePullSecrets:
       - name: secret-registry
+
