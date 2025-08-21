@@ -1,7 +1,7 @@
 FROM node:18-alpine
 
 WORKDIR /app
-COPY ./app.js .
+COPY ./app/app.js .
 
 EXPOSE 8080
 
