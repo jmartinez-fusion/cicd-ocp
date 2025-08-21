@@ -22,6 +22,9 @@ spec:
   - name: IMAGE
     type: string
     description: image to be build from the code
+  - name: DOCKERFILE
+    type: string
+    description: Path to the Dockerfile to build.
   tasks:
   - name: fetch-repository
     taskRef:
@@ -58,6 +61,8 @@ spec:
     params:
     - name: IMAGE
       value: $(params.IMAGE)
+    - name: DOCKERFILE
+      value: $(params.DOCKERFILE)
     workspaces:
     - name: source
       workspace: shared-workspace
