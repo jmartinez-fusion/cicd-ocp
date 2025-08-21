@@ -8,7 +8,7 @@ spec:
     description: The git repository url
   - name: git-revision
     description: The git revision
-    default: master
+    default: main
   - name: git-repo-name
     description: The name of the deployment to be created / patched
 
@@ -24,13 +24,13 @@ spec:
         name: build-and-deploy
       params:
       - name: deployment-name
-        value: $(tt.params.git-repo-name)
+        value: hola-pod 
       - name: git-url
         value: $(tt.params.git-repo-url)
       - name: git-revision
         value: $(tt.params.git-revision)
       - name: IMAGE
-        value: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(tt.params.git-repo-name)
+        value: quay.io/martinezj/hola-pod 
       - name: subdirectory
         value: ''
       - name: DOCKERFILE
