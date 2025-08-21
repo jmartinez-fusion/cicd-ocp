@@ -1,6 +1,9 @@
 #!/bin/bash
 
 while true; do
-    oc logs deployment/hola-pod | grep -v "Found"
+    # Mostrar solo la línea que contiene "Servidor escuchando"
+    oc logs deployment/hola-pod | grep "Servidor escuchando"
+    
+    # Esperar 3 segundos
     sleep 3
 done
