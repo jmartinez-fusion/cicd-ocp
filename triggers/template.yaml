@@ -12,7 +12,8 @@ spec:
   - name: git-repo-name
     description: The name of the deployment to be created / patched
   - name: git-url-infra
-    description: blabla
+    description: Repo con la infraestructura
+    default: https://github.com/jmartinez-fusion/infra-demo.git
 
   resourcetemplates:
   - apiVersion: tekton.dev/v1
