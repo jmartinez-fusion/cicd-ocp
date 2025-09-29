@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
-  name: build-deploy-demo-lastdemo
+  name: build-deploy-demo-lastdemo1
 spec:
   pipelineRef:
     name: build-and-deploy

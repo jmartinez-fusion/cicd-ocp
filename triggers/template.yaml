@@ -11,6 +11,8 @@ spec:
     default: main
   - name: git-repo-name
     description: The name of the deployment to be created / patched
+  - name: git-url-infra
+    description: blabla
 
   resourcetemplates:
   - apiVersion: tekton.dev/v1
