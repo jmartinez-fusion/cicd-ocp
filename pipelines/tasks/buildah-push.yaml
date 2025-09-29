@@ -1,0 +1,31 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: buildah-push
+spec:
+  params:
+    - name: SRC_IMAGE
+      description: Imagen que ya está en el registry interno
+    - name: DEST_IMAGE
+      description: Imagen destino 
+    - name: TLSVERIFY
+      description: Verificar TLS en el push
+      default: "true"
+  workspaces:
+    - name: dockerconfig
+      description: >-
+        Workspace con el .docker/config.json para autenticarse contra Quay.
+      optional: true
+  steps:
+    - name: push
+      image: quay.io/buildah/stable:v1
+      script: |
+        # Si tengo config.json, la uso
+        [ "$(workspaces.dockerconfig.bound)" = "true" ] && export DOCKER_CONFIG=$(workspaces.dockerconfig.path)
+        
+        echo "Pusheando imagen de $(params.SRC_IMAGE) a $(params.DEST_IMAGE)..."
+        buildah pull --tls-verify=$(params.TLSVERIFY) docker://$(params.SRC_IMAGE)
+        buildah tag $(params.SRC_IMAGE) $(params.DEST_IMAGE)
+        buildah push --tls-verify=$(params.TLSVERIFY) docker://$(params.DEST_IMAGE)
+      # securityContext:
+      #   privileged: true

@@ -31,8 +31,8 @@ spec:
         value: $(tt.params.git-revision)
       - name: IMAGE
         value: quay.io/martinezj/hola-pod 
-      - name: subdirectory
-        value: ''
+      - name: IMAGE-TO-QUAY
+        value: quay.io/martinezj/demo-ocp
       - name: DOCKERFILE
         value: ./app/Dockerfile
       workspaces:

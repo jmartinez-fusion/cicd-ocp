@@ -1,0 +1,39 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: build-deploy-demo-lastdemo
+spec:
+  pipelineRef:
+    name: build-and-deploy
+  params:
+  - name: deployment-name
+    value: hola-pod
+  - name: git-url
+    value: https://github.com/jmartinez-fusion/cicd-ocp.git
+  - name: git-revision
+    value: main
+  - name: git-url-infra
+    value: https://github.com/jmartinez-fusion/infra-demo.git
+  - name: git-revision-infra
+    value: qa
+  - name: IMAGE
+    value: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/demo
+  - name: IMAGE-TO-QUAY
+    value: quay.io/martinezj/demo-ocp:1.0.0
+  - name: DOCKERFILE
+    value: ./app/Dockerfile
+  workspaces:
+  - name: shared-workspace
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 500Mi
+  - name: dockerconfig-ws
+    secret:
+      secretName: secret-registry
+  - name: git-auth
+    secret:
+      secretName: git-basic-auth

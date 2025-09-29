@@ -5,6 +5,7 @@ metadata:
 spec:
   workspaces:
   - name: shared-workspace
+  - name: git-auth
   params:
   - name: deployment-name
     type: string
@@ -12,16 +13,22 @@ spec:
   - name: git-url
     type: string
     description: url of the git repo for the code of deployment
-  - name: subdirectory
-    type: string
-    description: Subdirectory inside the `output` Workspace to clone the repo into.
   - name: git-revision
     type: string
     description: revision to be used from repo of the code for deployment
+  - name: git-url-infra
+    type: string
+    description: url of the git INFRA repo for the code of deployment
+  - name: git-revision-infra
+    type: string
+    description: revision to be used from INFRA repo of the code for deployment
     default: master
   - name: IMAGE
     type: string
     description: image to be build from the code
+  - name: IMAGE-TO-QUAY
+    type: string
+    description: image push quay.io
   - name: DOCKERFILE
     type: string
     description: Path to the Dockerfile to build.
@@ -42,8 +49,6 @@ spec:
     params:
     - name: URL
       value: $(params.git-url)
-    - name: SUBDIRECTORY
-      value: $(params.subdirectory)
     - name: DELETE_EXISTING
       value: "true"
     - name: REVISION
@@ -86,3 +91,103 @@ spec:
       value: $(params.IMAGE)
     runAfter:
     - apply-manifests
+  - name: push-to-quay
+    taskRef:
+      resolver: cluster
+      params:
+      - name: kind
+        value: task
+      - name: name
+        value: buildah
+      - name: namespace
+        value: openshift-pipelines
+    params:
+    - name: IMAGE
+      value: $(params.IMAGE-TO-QUAY)
+    - name: DOCKERFILE
+      value: $(params.DOCKERFILE)
+    workspaces:
+    - name: source
+      workspace: shared-workspace
+    runAfter:
+    - update-deployment
+  - name: fetch-infra-repository
+    taskRef:
+      resolver: cluster
+      params:
+      - name: kind
+        value: task
+      - name: name
+        value: git-clone
+      - name: namespace
+        value: openshift-pipelines
+    workspaces:
+    - name: output
+      workspace: shared-workspace
+    params:
+    - name: URL
+      value: $(params.git-url-infra)
+    - name: DELETE_EXISTING
+      value: "true"
+    - name: REVISION
+      value: $(params.git-revision-infra) 
+    runAfter:
+    - push-to-quay
+
+  - name: update-image-tag-in-yaml
+    taskRef:
+      resolver: cluster
+      params:
+      - name: kind
+        value: task
+      - name: name
+        value: yq
+      - name: namespace
+        value: openshift-pipelines
+    workspaces:
+    - name: source
+      workspace: shared-workspace
+    params:
+    - name: SCRIPT
+      value: |
+        yq eval -i '.spec.template.spec.containers[0].image = "$(params.IMAGE-TO-QUAY)"' ./deployment.yaml
+    runAfter:
+    - fetch-infra-repository
+
+  - name: commit-and-push-infra
+    taskSpec:
+      workspaces:
+      - name: source
+      - name: basic-auth
+      steps:
+      - name: commit
+        image: docker.io/alpine/git
+        workingDir: $(workspaces.source.path)
+        script: |
+          # Configurar credenciales
+          cp $(workspaces.basic-auth.path)/.git-credentials /root/.git-credentials
+          cp $(workspaces.basic-auth.path)/.gitconfig /root/.gitconfig
+
+          git config --global user.name "tekton-bot"
+          git config --global user.email "tekton@example.com"
+
+          git config --global --add safe.directory $(workspaces.source.path)
+
+          # Asegurar estar en la rama correcta
+          git checkout -B $(params.git-revision-infra) origin/$(params.git-revision-infra)
+
+          git add ./deployment.yaml
+          git commit -m "Update deployment image to $(params.IMAGE-TO-QUAY)" || echo "No changes to commit"
+
+          git push https://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@github.com/jmartinez-fusion/infra-demo.git $(params.git-revision-infra)
+    workspaces:
+      - name: source
+        workspace: shared-workspace
+      - name: basic-auth
+        workspace: git-auth
+    runAfter:
+    - update-image-tag-in-yaml
+  
+
+  
+
