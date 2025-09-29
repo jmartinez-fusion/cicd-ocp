@@ -29,6 +29,10 @@ spec:
         value: $(tt.params.git-repo-url)
       - name: git-revision
         value: $(tt.params.git-revision)
+      - name: git-url-infra
+        value: https://github.com/jmartinez-fusion/infra-demo.git
+      - name: git-revision-infra
+        value: qa
       - name: IMAGE
         value: quay.io/martinezj/hola-pod 
       - name: IMAGE-TO-QUAY
