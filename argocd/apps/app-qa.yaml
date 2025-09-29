@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: demo-qa
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/jmartinez-fusion/infra-demo.git
+    targetRevision: qa
+    path: .
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: qa
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

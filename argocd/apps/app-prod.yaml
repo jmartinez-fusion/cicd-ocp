@@ -1,0 +1,15 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: demo-prod
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/jmartinez-fusion/infra-demo.git
+    targetRevision: main
+    path: .
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: prod
+  syncPolicy: {}
