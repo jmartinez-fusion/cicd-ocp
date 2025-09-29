@@ -51,3 +51,9 @@ spec:
             resources:
               requests:
                 storage: 500Mi
+      - name: dockerconfig-ws
+        secret:
+          secretName: secret-registry
+      - name: git-auth
+        secret:
+          secretName: git-basic-auth
